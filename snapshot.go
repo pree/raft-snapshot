@@ -95,17 +95,17 @@ func NewWithSealer(logger hclog.Logger, r *raft.Raft, sealer Sealer) (*Snapshot,
 	out := io.MultiWriter(hash, archive)
 
 	// Wrap the file writer in a gzip compressor.
-	compressor := gzip.NewWriter(out)
+	// compressor := gzip.NewWriter(out)
 
 	// Write the archive.
-	if err := write(compressor, metadata, snap, sealer); err != nil {
+	if err := write(out, metadata, snap, sealer); err != nil {
 		return nil, fmt.Errorf("failed to write snapshot file: %v", err)
 	}
 
 	// Finish the compressed stream.
-	if err := compressor.Close(); err != nil {
-		return nil, fmt.Errorf("failed to compress snapshot file: %v", err)
-	}
+	//if err := compressor.Close(); err != nil {
+	//	return nil, fmt.Errorf("failed to compress snapshot file: %v", err)
+	//}
 
 	// rewind it so it's ready to be streamed out by the caller.
 	if _, err := archive.Seek(0, 0); err != nil {
