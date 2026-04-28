@@ -95,7 +95,9 @@ func NewWithSealer(logger hclog.Logger, r *raft.Raft, sealer Sealer) (*Snapshot,
 	out := io.MultiWriter(hash, archive)
 
 	// Wrap the file writer in a gzip compressor.
-	compressor := gzip.NewWriterLevel(out, gzip.NoCompression)
+	if compressor, err := gzip.NewWriterLevel(out, gzip.NoCompression); err != nil {
+		return nil, fmt.Errof("failed to create gzip writer: %v", err)
+	}
 
 	// Write the archive.
 	if err := write(compressor, metadata, snap, sealer); err != nil {
@@ -140,10 +142,12 @@ func Write(logger hclog.Logger, r *raft.Raft, sealer Sealer, w io.Writer) error 
 	}()
 
 	// Wrap the file writer in a gzip compressor.
-	compressor := gzip.NewWriterLevel(w, gzip.NoCompression)
+	if compressor, err := gzip.NewWriterLevel(w, gzip.NoCompression); err != nil {
+		return fmt.Errorf("failed to create gzip writer: %v", err)
+	}
 
 	// Write the archive.
-	if err := write(w, metadata, snap, sealer); err != nil {
+	if err := write(compressor, metadata, snap, sealer); err != nil {
 		return fmt.Errorf("failed to write snapshot file: %v", err)
 	}
 
