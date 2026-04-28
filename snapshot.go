@@ -140,17 +140,17 @@ func Write(logger hclog.Logger, r *raft.Raft, sealer Sealer, w io.Writer) error 
 	}()
 
 	// Wrap the file writer in a gzip compressor.
-	compressor := gzip.NewWriter(w)
+	//compressor := gzip.NewWriter(w)
 
 	// Write the archive.
-	if err := write(compressor, metadata, snap, sealer); err != nil {
+	if err := write(w, metadata, snap, sealer); err != nil {
 		return fmt.Errorf("failed to write snapshot file: %v", err)
 	}
 
 	// Finish the compressed stream.
-	if err := compressor.Close(); err != nil {
-		return fmt.Errorf("failed to compress snapshot file: %v", err)
-	}
+	//if err := compressor.Close(); err != nil {
+	//	return fmt.Errorf("failed to compress snapshot file: %v", err)
+	//}
 
 	if err := snap.Close(); err != nil {
 		return fmt.Errorf("failed to close Raft snapshot: %w", err)
